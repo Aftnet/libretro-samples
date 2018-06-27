@@ -1,2 +1,2 @@
 SOURCES_C += \
-	libretro.c \
+	libretro.c

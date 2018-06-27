@@ -110,12 +110,12 @@ MSVCCOMPILEFLAGS += $(MSVCSTDLIBFLAG)
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	link.exe -o $@ $^ $(LDFLAGS) $(LIBS)
+	link.exe -out:$@ $^ $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp
-	cl.exe -c $< $(MSVCCOMPILEFLAGS) $(CXXFLAGS)
+	cl.exe -c -Fo$@ $< $(MSVCCOMPILEFLAGS) $(CXXFLAGS)
 %.o: %.c
-	cl.exe -c $< $(MSVCCOMPILEFLAGS) $(CFLAGS)
+	cl.exe -c -Fo$@ $< $(MSVCCOMPILEFLAGS) $(CFLAGS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET) $(TARGET_NAME).lib $(TARGET_NAME).exp $(TARGET_NAME).pdb $(TARGET_NAME).manifest
