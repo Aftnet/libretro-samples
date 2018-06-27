@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "libretro.h"
+#include "libretro_d3d.h"
 
 static struct retro_hw_render_callback hw_render;
 
