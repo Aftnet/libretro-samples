@@ -10,6 +10,14 @@
 
 #include <DirectXMath.h>
 
+inline void ThrowIfFailed(HRESULT hr)
+{
+    if (FAILED(hr))
+    {
+        throw hr;
+    }
+}
+
 struct ModelViewProjectionConstantBuffer
 {
     DirectX::XMFLOAT4X4 model;
@@ -28,6 +36,9 @@ static struct retro_hw_render_callback hw_render;
 
 const unsigned int fb_width = 800;
 const unsigned int fb_height = 600;
+
+ID3D11Device* d3ddevice;
+ID3D11DeviceContext* d3dcontext;
 
 ID3D11VertexShader* vertexShader;
 ID3D11PixelShader* pixelShader;
@@ -65,18 +76,19 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->timing = (struct retro_system_timing) {
-      .fps = 60.0,
-      .sample_rate = 30000.0,
-   };
+    static struct retro_system_timing coreTimings;
+    coreTimings.fps = 60.0;
+    coreTimings.sample_rate = 24000;
 
-   info->geometry = (struct retro_game_geometry) {
-      .base_width   = fb_width,
-      .base_height  = fb_height,
-      .max_width    = fb_width,
-      .max_height   = fb_height,
-      .aspect_ratio = fb_width / fb_height,
-   };
+    static struct retro_game_geometry coreGrometry;
+    coreGrometry.base_width   = fb_width;
+    coreGrometry.base_height  = fb_height;
+    coreGrometry.max_width    = fb_width;
+    coreGrometry.max_height   = fb_height;
+    coreGrometry.aspect_ratio = fb_width / fb_height;
+
+    info->timing = coreTimings;
+    info->geometry = coreGrometry;
 }
 
 static retro_video_refresh_t video_cb;
@@ -126,9 +138,8 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 static void update_variables(void)
 {
-   struct retro_variable var = {
-      .key = "testgl_resolution",
-   };
+   static struct retro_variable var;
+   var.key = "testgl_resolution";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
@@ -158,17 +169,18 @@ void retro_run(void)
 
 static void context_reset(void)
 {
+
    //Recreate d3d resources here
    static const VertexPositionColor cubeVertices [] =
         {
-            { XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f) },
-            { XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-            { XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-            { XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
-            { XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-            { XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f) },
-            { XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f) },
-            { XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
+            { DirectX::XMFLOAT3(-0.5f, -0.5f, -0.5f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f) },
+            { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.5f), DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f) },
+            { DirectX::XMFLOAT3(-0.5f, 0.5f, -0.5f), DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f) },
+            { DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT3(0.0f, 1.0f, 1.0f) },
+            { DirectX::XMFLOAT3(0.5f, -0.5f, -0.5f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f) },
+            { DirectX::XMFLOAT3(0.5f, -0.5f, 0.5f), DirectX::XMFLOAT3(1.0f, 0.0f, 1.0f) },
+            { DirectX::XMFLOAT3(0.5f, 0.5f, -0.5f), DirectX::XMFLOAT3(1.0f, 1.0f, 0.0f) },
+            { DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f) },
         };
 
         D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
@@ -176,7 +188,7 @@ static void context_reset(void)
         vertexBufferData.SysMemPitch = 0;
         vertexBufferData.SysMemSlicePitch = 0;
         CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
-        ThrowIfFailed(m_d3dDevice->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
+        ThrowIfFailed(d3ddevice->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &vertexBuffer));
 
         // Load mesh indices. Each triple of indices represents
         // a triangle to be rendered on the screen.
@@ -204,14 +216,14 @@ static void context_reset(void)
             1, 7, 5,
         };
 
-        m_indexCount = ARRAYSIZE(cubeIndices);
+        indexCount = ARRAYSIZE(cubeIndices);
 
         D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
         indexBufferData.pSysMem = cubeIndices;
         indexBufferData.SysMemPitch = 0;
         indexBufferData.SysMemSlicePitch = 0;
         CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
-        ThrowIfFailed(m_d3dDevice->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+        ThrowIfFailed(d3ddevice->CreateBuffer(&indexBufferDesc, &indexBufferData, &indexBuffer));
 }
 
 static void context_destroy(void)

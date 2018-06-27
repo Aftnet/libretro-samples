@@ -1,2 +1,2 @@
-SOURCES_C += \
-	libretro.c
+SOURCES_CXX += \
+	libretro.cpp
