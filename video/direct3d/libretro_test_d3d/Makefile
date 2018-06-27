@@ -11,17 +11,17 @@ ifneq (,$(findstring windows_msvc2017,$(platform)))
 	PlatformSuffix = $(subst windows_msvc2017_,,$(platform))
 	ifneq (,$(findstring desktop,$(PlatformSuffix)))
 		WinPartition = desktop
-		MSVC2017CompileFlags = -DWINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP -FS
+		MSVCCOMPILEFLAGS = -DWINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP -FS
 		LDFLAGS += -MANIFEST -LTCG:incremental -NXCOMPAT -DYNAMICBASE -DEBUG -OPT:REF -INCREMENTAL:NO -SUBSYSTEM:WINDOWS -MANIFESTUAC:"level='asInvoker' uiAccess='false'" -OPT:ICF -ERRORREPORT:PROMPT -NOLOGO -TLBID:1
 		LIBS += kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib
 	else ifneq (,$(findstring uwp,$(PlatformSuffix)))
 		WinPartition = uwp
-		MSVC2017CompileFlags = -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WINDLL -D_UNICODE -DUNICODE -D__WRL_NO_DEFAULT_LIB__ -EHsc -FS
+		MSVCCOMPILEFLAGS = -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WINDLL -D_UNICODE -DUNICODE -D__WRL_NO_DEFAULT_LIB__ -EHsc -FS
 		LDFLAGS += -APPCONTAINER -NXCOMPAT -DYNAMICBASE -MANIFEST:NO -LTCG -OPT:REF -SUBSYSTEM:CONSOLE -MANIFESTUAC:NO -OPT:ICF -ERRORREPORT:PROMPT -NOLOGO -TLBID:1 -DEBUG:FULL -WINMD:NO
 		LIBS += WindowsApp.lib
 	endif
 
-	CPPFLAGS += $(MSVC2017CompileFlags)
+	LDFLAGS += -DLL
 
 	TargetArchMoniker = $(subst $(WinPartition)_,,$(PlatformSuffix))
 
@@ -86,29 +86,26 @@ ifneq (,$(findstring windows_msvc2017,$(platform)))
 
 	export INCLUDE := $(INCLUDE);$(WindowsSDKSharedIncludeDir);$(WindowsSDKUCRTIncludeDir);$(WindowsSDKUMIncludeDir)
 	export LIB := $(LIB);$(WindowsSDKUCRTLibDir);$(WindowsSDKUMLibDir)
-	TARGET := $(TARGET_NAME).dll
-	LDFLAGS += -DLL
 endif
-
-include Makefile.common
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
-ifeq ($(DEBUG), 1)
-	ifeq ($(STATIC_LINKING),1)
-	    CPPFLAGS += -MTd
-    else
-	    CPPFLAGS += -MDd
-    endif
-    CPPFLAGS += -Od -Zi -DDEBUG -D_DEBUG
+ifeq ($(STATIC_LINKING), 1)
+    STDLIBFLAG := -MT
+    TARGET := $(TARGET_NAME).lib
 else
-    ifeq ($(STATIC_LINKING),1)
-        CPPFLAGS += -MT
-    else
-        CPPFLAGS += -MD
-    endif
-    CPPFLAGS += -O2 -DNDEBUG
+    STDLIBFLAG := -MD
+    TARGET := $(TARGET_NAME).dll
 endif
+
+ifeq ($(DEBUG), 1)
+	STDLIBFLAG  := $(STDLIBFLAG)d
+    MSVCCOMPILEFLAGS += -Od -Zi -DDEBUG -D_DEBUG
+else
+    MSVCCOMPILEFLAGS += -O2 -DNDEBUG
+endif
+
+MSVCCOMPILEFLAGS += $(STDLIBFLAG)
 
 all: $(TARGET)
 
@@ -116,9 +113,9 @@ $(TARGET): $(OBJECTS)
 	link.exe -o $@ $^ $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp
-	cl.exe -c $< $(CPPFLAGS) $(CXXFLAGS)
+	cl.exe -c $< $(MSVCCOMPILEFLAGS) $(CXXFLAGS)
 %.o: %.c
-	cl.exe -c $< $(CPPFLAGS) $(CFLAGS)
+	cl.exe -c $< $(MSVCCOMPILEFLAGS) $(CFLAGS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET) $(TARGET_NAME).lib $(TARGET_NAME).exp $(TARGET_NAME).pdb $(TARGET_NAME).manifest
