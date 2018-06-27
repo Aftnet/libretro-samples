@@ -5,13 +5,6 @@ BACKSLASH := \$(BACKSLASH)
 filter_out1 = $(filter-out $(firstword $1),$1)
 filter_out2 = $(call filter_out1,$(call filter_out1,$1))
 
-CC  = cl.exe
-CXX = cl.exe
-LD = link.exe
-AR = link.exe
-OBJOUT = -o
-LINKOUT = -o
-
 # Windows MSVC 2017 all architectures
 ifneq (,$(findstring windows_msvc2017,$(platform)))
 
@@ -28,8 +21,7 @@ ifneq (,$(findstring windows_msvc2017,$(platform)))
 		LIBS += WindowsApp.lib
 	endif
 
-	CFLAGS += $(MSVC2017CompileFlags)
-	CXXFLAGS += $(MSVC2017CompileFlags)
+	CPPFLAGS += $(MSVC2017CompileFlags)
 
 	TargetArchMoniker = $(subst $(WinPartition)_,,$(PlatformSuffix))
 
@@ -104,24 +96,18 @@ OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
 ifeq ($(DEBUG), 1)
 	ifeq ($(STATIC_LINKING),1)
-	    CFLAGS += -MTd
-	    CXXFLAGS += -MTd
+	    CPPFLAGS += -MTd
     else
-	    CFLAGS += -MDd
-	    CXXFLAGS += -MDd
+	    CPPFLAGS += -MDd
     endif
-    CFLAGS += -Od -Zi -DDEBUG -D_DEBUG
-    CXXFLAGS += -Od -Zi -DDEBUG -D_DEBUG
+    CPPFLAGS += -Od -Zi -DDEBUG -D_DEBUG
 else
     ifeq ($(STATIC_LINKING),1)
-        CFLAGS += -MT
-        CXXFLAGS += -MT
+        CPPFLAGS += -MT
     else
-        CFLAGS += -MD
-        CXXFLAGS += -MD
+        CPPFLAGS += -MD
     endif
-    CFLAGS += -O2 -DNDEBUG
-    CXXFLAGS += -O2 -DNDEBUG
+    CPPFLAGS += -O2 -DNDEBUG
 endif
 
 all: $(TARGET)
@@ -130,9 +116,9 @@ $(TARGET): $(OBJECTS)
 	link.exe -o $@ $^ $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp
-	cl.exe -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS)
+	cl.exe -c $< $(CPPFLAGS) $(CXXFLAGS)
 %.o: %.c
-	cl.exe -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
+	cl.exe -c $< $(CPPFLAGS) $(CFLAGS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET) $(TARGET_NAME).lib $(TARGET_NAME).exp $(TARGET_NAME).pdb $(TARGET_NAME).manifest
