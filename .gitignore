@@ -9,3 +9,6 @@
 *.exe
 *.so
 *.bc
+*.vcxproj.user
+**/.vs
+**/[Dd]ebug
