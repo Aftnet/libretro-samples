@@ -1,2 +1,3 @@
 SOURCES_CXX += \
+	renderer.cpp \
 	libretro.cpp
