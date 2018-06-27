@@ -150,7 +150,7 @@ static void context_reset(void)
 	}
 
 	//Recreate d3d resources here
-	D3DRenderer.Init();
+	D3DRenderer.Init(d3d11->device, d3d11->context, fb_width, fb_height);
 }
 
 static void context_destroy(void)
