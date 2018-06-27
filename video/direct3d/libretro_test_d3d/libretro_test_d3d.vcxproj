@@ -160,7 +160,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libretro.cpp" />
-    <ClCompile Include="libretro_test_d3d.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="sokol_gfx.c" />
   </ItemGroup>

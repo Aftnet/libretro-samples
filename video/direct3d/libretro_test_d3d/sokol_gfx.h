@@ -4073,13 +4073,19 @@ extern "C" {
 #include <windows.h>
 #include <d3d11.h>
 
+#if (defined(WINAPI_FAMILY_PARTITION) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP))
+#pragma comment (lib, "WindowsApp.lib")
+#else
 #pragma comment (lib, "user32.lib")
 #pragma comment (lib, "dxgi.lib")
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "dxguid.lib")
+#endif
 #if defined(SOKOL_D3D11_SHADER_COMPILER)
 #include <d3dcompiler.h>
+#if !(defined(WINAPI_FAMILY_PARTITION) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP))
 #pragma comment (lib, "d3dcompiler.lib")
+#endif
 #endif
 
 #ifdef __cplusplus

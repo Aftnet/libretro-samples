@@ -1,3 +1,6 @@
 SOURCES_CXX += \
-	renderer.cpp \
+	Renderer.cpp \
 	libretro.cpp
+
+SOURCES_C += \
+	sokol_gfx.c
