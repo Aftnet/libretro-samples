@@ -2,7 +2,6 @@
 
 #include "libretro_d3d.h"
 
-
 class Renderer
 {
 public:

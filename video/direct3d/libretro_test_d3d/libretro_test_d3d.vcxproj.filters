@@ -24,6 +24,9 @@
     <ClCompile Include="libretro.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sokol_gfx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="libretro_d3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sokol_gfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -162,11 +162,13 @@
     <ClCompile Include="libretro.cpp" />
     <ClCompile Include="libretro_test_d3d.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="sokol_gfx.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libretro.h" />
     <ClInclude Include="libretro_d3d.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="sokol_gfx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
