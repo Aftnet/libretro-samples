@@ -1,6 +1,10 @@
 *.o
 *.a
 *.dll
+*.lib
+*.exp
+*.pdb
+*.manifest
 *.dylib
 *.exe
 *.so
