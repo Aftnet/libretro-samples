@@ -1,8 +1,11 @@
-#pragma once
+#ifndef _RENDERER_H_
+#define _RENDERER_H_
 
-#include "libretro_d3d.h"
-#include "sokol_gfx.h"
+struct retro_hw_render_interface_d3d11;
 
-void renderer_init(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, unsigned int fbWidth, unsigned int fbHeight);
+void renderer_setup_d3d(struct retro_hw_render_interface_d3d11* d3d);
+void renderer_init();
 void renderer_deinit();
-void renderer_render_frame();
+void renderer_render_frame(int framebuffer_width, int framebuffer_height);
+
+#endif

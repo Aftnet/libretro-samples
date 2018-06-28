@@ -1,18 +1,19 @@
 #include "renderer.h"
-
-static unsigned int framebuffer_width = 0;
-static unsigned int framebuffer_height = 0;
+#include "libretro_d3d.h"
+#include "sokol_gfx.h"
 
 static sg_shader shd = { 0 };
 static sg_pipeline pip = { 0 };
 static sg_draw_state draw_state = { 0 };
 static sg_pass_action pass_action = { 0 };
 
-void renderer_init(ID3D11Device* device, ID3D11DeviceContext* context, unsigned int fb_width, unsigned int fb_height)
+void renderer_setup_d3d(struct retro_hw_render_interface_d3d11* d3d)
 {
-	framebuffer_width = fb_width;
-	framebuffer_height = fb_height;
+	//sg_setup()
+}
 
+void renderer_init()
+{
 	/* a vertex buffer */
 	const float vertices[] = {
 		// positions            // colors
@@ -26,7 +27,7 @@ void renderer_init(ID3D11Device* device, ID3D11DeviceContext* context, unsigned 
 	});
 
 	/* a shader */
-	sg_shader shd = sg_make_shader(&(sg_shader_desc) {
+	shd = sg_make_shader(&(sg_shader_desc) {
 		.vs.source =
 			"#version 330\n"
 			"in vec4 position;\n"
@@ -46,25 +47,17 @@ void renderer_init(ID3D11Device* device, ID3D11DeviceContext* context, unsigned 
 	});
 
 	/* a pipeline state object (default render states are fine for triangle) */
-	sg_pipeline pip = sg_make_pipeline(&(sg_pipeline_desc) {
+	pip = sg_make_pipeline(&(sg_pipeline_desc) {
 		.shader = shd,
 			.layout = {
 			.attrs = {
 			[0] = { .name = "position",.format = SG_VERTEXFORMAT_FLOAT3 },
 			[1] = { .name = "color0",.format = SG_VERTEXFORMAT_FLOAT4 }
-		}
-		}
-	});
+		}}});
 
 	/* a draw state with all the resource binding */
-	sg_draw_state draw_state = {
-		.pipeline = pip,
-		.vertex_buffers[0] = vbuf
-	};
-
-	/* default pass action (clear to grey) */
-	sg_pass_action pass_action = { 0 };
-
+	draw_state.pipeline = pip;
+	draw_state.vertex_buffers[0] = vbuf;
 }
 
 void renderer_deinit()
@@ -72,7 +65,7 @@ void renderer_deinit()
 	sg_shutdown();
 }
 
-void renderer_render_frame()
+void renderer_render_frame(int framebuffer_width, int framebuffer_height)
 {
 	sg_begin_default_pass(&pass_action, framebuffer_width, framebuffer_height);
 	sg_apply_draw_state(&draw_state);

@@ -126,7 +126,7 @@ void retro_run(void)
 	}
 
 	//Render code here
-	renderer_render_frame();
+	renderer_render_frame(fb_width, fb_height);
 
 	frame_count++;
 
@@ -149,7 +149,8 @@ static void context_reset(void)
 	}
 
 	//Recreate d3d resources here
-	renderer_init(d3d11->device, d3d11->context, fb_width, fb_height);
+	renderer_setup_d3d(d3d11);
+	renderer_init();
 }
 
 static void context_destroy(void)
