@@ -149,8 +149,7 @@ static void context_reset(void)
 	}
 
 	//Recreate d3d resources here
-	renderer_setup_d3d(d3d11);
-	renderer_init();
+	renderer_init_d3d(d3d11, fb_width, fb_height);
 }
 
 static void context_destroy(void)

@@ -3,9 +3,8 @@
 
 struct retro_hw_render_interface_d3d11;
 
-void renderer_setup_d3d(struct retro_hw_render_interface_d3d11* d3d);
-void renderer_init();
+void renderer_init_d3d(struct retro_hw_render_interface_d3d11* d3d, int fb_width, int fb_height);
 void renderer_deinit();
-void renderer_render_frame(int framebuffer_width, int framebuffer_height);
+void renderer_render_frame();
 
 #endif

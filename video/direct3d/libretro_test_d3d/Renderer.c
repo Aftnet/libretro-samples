@@ -3,13 +3,20 @@
 #include "sokol_gfx.h"
 #include "d3d_util.h"
 
+static int framebuffer_width = 0;
+static int framebuffer_height = 0;
+
 static sg_shader shd = { 0 };
 static sg_pipeline pip = { 0 };
 static sg_draw_state draw_state = { 0 };
 static sg_pass_action pass_action = { 0 };
 
-void renderer_setup_d3d(struct retro_hw_render_interface_d3d11* d3d)
+void renderer_init();
+
+void renderer_init_d3d(struct retro_hw_render_interface_d3d11* d3d, int fb_width, int fb_height)
 {
+	d3d_util_init(d3d->device, framebuffer_width, framebuffer_height);
+
 	sg_desc desc = {
 		.d3d11_device = d3d->device,
 		.d3d11_device_context = d3d->context,
@@ -18,6 +25,7 @@ void renderer_setup_d3d(struct retro_hw_render_interface_d3d11* d3d)
 	};
 
 	sg_setup(&desc);
+	renderer_init();
 }
 
 void renderer_init()
@@ -74,7 +82,7 @@ void renderer_deinit()
 	d3d_util_deinit();
 }
 
-void renderer_render_frame(int framebuffer_width, int framebuffer_height)
+void renderer_render_frame()
 {
 	sg_begin_default_pass(&pass_action, framebuffer_width, framebuffer_height);
 	sg_apply_draw_state(&draw_state);
