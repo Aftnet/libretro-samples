@@ -159,17 +159,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="d3d_util.cpp" />
-    <ClCompile Include="libretro.c" />
-    <ClCompile Include="renderer.c" />
-    <ClCompile Include="sokol_gfx.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="d3d_util.h" />
     <ClInclude Include="libretro.h" />
     <ClInclude Include="libretro_d3d.h" />
-    <ClInclude Include="renderer.h" />
-    <ClInclude Include="sokol_gfx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libretro.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

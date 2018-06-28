@@ -3,15 +3,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include "libretro_d3d.h"
-#include "renderer.h"
 
 static struct retro_hw_render_callback hw_render;
 static const struct retro_hw_render_interface_d3d11 *d3d11;
 
+static ID3D11Device* d3ddevice = nullptr;
+static ID3D11DeviceContext* d3dctx = nullptr;
+
 const unsigned int fb_width = 800;
 const unsigned int fb_height = 600;
+
+static ID3D11Texture2D* framebuffer_texture;
+static ID3D11RenderTargetView* framebuffer_view;
 
 void retro_init(void)
 {}
@@ -125,8 +131,9 @@ void retro_run(void)
 	{
 	}
 
-	//Render code here
-	renderer_render_frame();
+	//Render here
+	D3D11_VIDEO_COLOR_RGBA clear_color{ 0.5f, 0.0f, 0.0f, 1.0f };
+	d3dctx->ClearRenderTargetView(framebuffer_view, (float*)&clear_color);
 
 	frame_count++;
 
@@ -148,13 +155,42 @@ static void context_reset(void)
 		return;
 	}
 
+	d3ddevice = d3d11->device;
+	d3dctx = d3d11->context;
+
 	//Recreate d3d resources here
-	renderer_init_d3d(d3d11, fb_width, fb_height);
+	D3D11_TEXTURE2D_DESC desc {};
+	desc.Width = fb_width;
+	desc.Height = fb_height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	assert(SUCCEEDED(d3ddevice->CreateTexture2D(&desc, nullptr, &framebuffer_texture)));
+	assert(SUCCEEDED(d3ddevice->CreateRenderTargetView(framebuffer_texture, NULL, &framebuffer_view)));
+
+	d3dctx->OMSetRenderTargets(1, &framebuffer_view, NULL);
+
+	// Set the viewport
+	D3D11_VIEWPORT viewport {};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = 800;
+	viewport.Height = 600;
+
+	d3dctx->RSSetViewports(1, &viewport);
 }
 
 static void context_destroy(void)
 {
-	renderer_deinit();
+	framebuffer_texture->Release();
+	framebuffer_view->Release();
 }
 
 static bool retro_init_hw_context(void)
