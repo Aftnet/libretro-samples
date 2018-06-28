@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "renderer.h"
 
 static unsigned int framebuffer_width = 0;
 static unsigned int framebuffer_height = 0;

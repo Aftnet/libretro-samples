@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "libretro_d3d.h"
-#include "Renderer.h"
+#include "renderer.h"
 
 static struct retro_hw_render_callback hw_render;
 static const struct retro_hw_render_interface_d3d11 *d3d11;
