@@ -6,8 +6,6 @@
 static int framebuffer_width = 0;
 static int framebuffer_height = 0;
 
-static sg_shader shd = { 0 };
-static sg_pipeline pip = { 0 };
 static sg_draw_state draw_state = { 0 };
 static sg_pass_action pass_action = { 0 };
 
@@ -45,8 +43,8 @@ void renderer_init()
 			.content = vertices,
 	});
 
-	/* a shader */
-	shd = sg_make_shader(&(sg_shader_desc) {
+	/* a shader to render the triangle */
+	sg_shader shd = sg_make_shader(&(sg_shader_desc) {
 		.vs.source =
 			"struct vs_in {\n"
 			"  float4 pos: POS;\n"
@@ -63,13 +61,13 @@ void renderer_init()
 			"  return outp;\n"
 			"}\n",
 			.fs.source =
-			"float4 main(float4 color: COLOR0): SV_Target0 {\n"
+			"float4 main(float4 color: COLOR0): SV_Target {\n"
 			"  return color;\n"
 			"}\n"
 	});
 
 	/* a pipeline state object (default render states are fine for triangle) */
-	pip = sg_make_pipeline(&(sg_pipeline_desc) {
+	sg_pipeline pip = sg_make_pipeline(&(sg_pipeline_desc) {
 		.shader = shd,
 			.layout = {
 			.attrs = {
