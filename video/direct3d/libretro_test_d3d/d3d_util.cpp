@@ -35,13 +35,16 @@ void d3d_util_init(ID3D11Device* device, int width, int height)
 	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, &render_target_texture));
 	ThrowIfFailed(device->CreateRenderTargetView(render_target_texture, nullptr, &render_target_view));
 
+	UINT sample_count = 1;
+
 	D3D11_TEXTURE2D_DESC ds_desc = { 0 };
 	ds_desc.Width = width;
 	ds_desc.Height = height;
 	ds_desc.MipLevels = 1;
 	ds_desc.ArraySize = 1;
 	ds_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	//ds_desc.SampleDesc = swap_chain_desc.SampleDesc;
+	ds_desc.SampleDesc.Count = sample_count;
+	ds_desc.SampleDesc.Quality = 0;
 	ds_desc.Usage = D3D11_USAGE_DEFAULT;
 	ds_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
@@ -49,7 +52,7 @@ void d3d_util_init(ID3D11Device* device, int width, int height)
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc = { 0 };
 	dsv_desc.Format = ds_desc.Format;
-	//dsv_desc.ViewDimension = sample_count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D
+	dsv_desc.ViewDimension = sample_count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 
 	ThrowIfFailed(device->CreateDepthStencilView(stencil_texture, &dsv_desc, &stencil_view));
 }

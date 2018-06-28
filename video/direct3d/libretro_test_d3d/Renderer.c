@@ -15,6 +15,9 @@ void renderer_init();
 
 void renderer_init_d3d(struct retro_hw_render_interface_d3d11* d3d, int fb_width, int fb_height)
 {
+	framebuffer_width = fb_width;
+	framebuffer_height = fb_height;
+
 	d3d_util_init(d3d->device, framebuffer_width, framebuffer_height);
 
 	sg_desc desc = {
@@ -45,20 +48,23 @@ void renderer_init()
 	/* a shader */
 	shd = sg_make_shader(&(sg_shader_desc) {
 		.vs.source =
-			"#version 330\n"
-			"in vec4 position;\n"
-			"in vec4 color0;\n"
-			"out vec4 color;\n"
-			"void main() {\n"
-			"  gl_Position = position;\n"
-			"  color = color0;\n"
+			"struct vs_in {\n"
+			"  float4 pos: POS;\n"
+			"  float4 color: COLOR;\n"
+			"};\n"
+			"struct vs_out {\n"
+			"  float4 color: COLOR0;\n"
+			"  float4 pos: SV_Position;\n"
+			"};\n"
+			"vs_out main(vs_in inp) {\n"
+			"  vs_out outp;\n"
+			"  outp.pos = inp.pos;\n"
+			"  outp.color = inp.color;\n"
+			"  return outp;\n"
 			"}\n",
 			.fs.source =
-			"#version 330\n"
-			"in vec4 color;\n"
-			"out vec4 frag_color;\n"
-			"void main() {\n"
-			"  frag_color = color;\n"
+			"float4 main(float4 color: COLOR0): SV_Target0 {\n"
+			"  return color;\n"
 			"}\n"
 	});
 
@@ -67,8 +73,8 @@ void renderer_init()
 		.shader = shd,
 			.layout = {
 			.attrs = {
-			[0] = { .name = "position",.format = SG_VERTEXFORMAT_FLOAT3 },
-			[1] = { .name = "color0",.format = SG_VERTEXFORMAT_FLOAT4 }
+			[0] = { .sem_name = "POS", .format = SG_VERTEXFORMAT_FLOAT3 },
+			[1] = { .sem_name = "COLOR", .format = SG_VERTEXFORMAT_FLOAT4 }
 		}}});
 
 	/* a draw state with all the resource binding */

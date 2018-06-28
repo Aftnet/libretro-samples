@@ -126,7 +126,7 @@ void retro_run(void)
 	}
 
 	//Render code here
-	renderer_render_frame(fb_width, fb_height);
+	renderer_render_frame();
 
 	frame_count++;
 
