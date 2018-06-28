@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="libretro.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sokol_gfx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

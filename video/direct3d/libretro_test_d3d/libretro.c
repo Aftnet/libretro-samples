@@ -13,8 +13,6 @@ static const struct retro_hw_render_interface_d3d11 *d3d11;
 const unsigned int fb_width = 800;
 const unsigned int fb_height = 600;
 
-Renderer D3DRenderer;
-
 void retro_init(void)
 {}
 
@@ -128,6 +126,7 @@ void retro_run(void)
 	}
 
 	//Render code here
+	renderer_render_frame();
 
 	frame_count++;
 
@@ -150,12 +149,12 @@ static void context_reset(void)
 	}
 
 	//Recreate d3d resources here
-	D3DRenderer.Init(d3d11->device, d3d11->context, fb_width, fb_height);
+	renderer_init(d3d11->device, d3d11->context, fb_width, fb_height);
 }
 
 static void context_destroy(void)
 {
-	D3DRenderer.Deinit();
+	renderer_deinit();
 }
 
 static bool retro_init_hw_context(void)
