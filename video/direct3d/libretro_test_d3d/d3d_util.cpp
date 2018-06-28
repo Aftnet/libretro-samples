@@ -3,6 +3,7 @@
 #include <dxgi.h>
 
 static ID3D11Texture2D* render_target = NULL;
+static ID3D11Texture2D* stencil_view = NULL;
 
 void ThrowIfFailed(HRESULT hr)
 {
@@ -12,7 +13,7 @@ void ThrowIfFailed(HRESULT hr)
 	}
 }
 
-void d3d11_init(ID3D11Device* device, int width, int height)
+void d3d_util_init(ID3D11Device* device, int width, int height)
 {
 	D3D11_TEXTURE2D_DESC desc = { 0 };
 	desc.Width = width;
@@ -30,7 +31,12 @@ void d3d11_init(ID3D11Device* device, int width, int height)
 	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, &render_target));
 }
 
-void* get_current_render_target()
+void* d3d_util_get_render_target()
 {
 	return render_target;
+}
+
+void* d3d_util_get_depth_stencil_view()
+{
+	return stencil_view;
 }

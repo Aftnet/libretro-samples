@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "libretro_d3d.h"
 #include "sokol_gfx.h"
+#include "d3d_util.h"
 
 static sg_shader shd = { 0 };
 static sg_pipeline pip = { 0 };
@@ -9,7 +10,14 @@ static sg_pass_action pass_action = { 0 };
 
 void renderer_setup_d3d(struct retro_hw_render_interface_d3d11* d3d)
 {
-	//sg_setup()
+	sg_desc desc = {
+		.d3d11_device = d3d->device,
+		.d3d11_device_context = d3d->context,
+		.d3d11_render_target_view_cb = d3d_util_get_render_target,
+		.d3d11_depth_stencil_view_cb = d3d_util_get_depth_stencil_view
+	};
+
+	sg_setup(&desc);
 }
 
 void renderer_init()
