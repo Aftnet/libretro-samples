@@ -71,6 +71,7 @@ void renderer_init()
 void renderer_deinit()
 {
 	sg_shutdown();
+	d3d_util_deinit();
 }
 
 void renderer_render_frame(int framebuffer_width, int framebuffer_height)

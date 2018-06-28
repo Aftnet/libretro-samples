@@ -8,6 +8,7 @@ extern "C" {
 struct ID3D11Device;
 
 void d3d_util_init(ID3D11Device* device, int width, int height);
+void d3d_util_deinit();
 void* d3d_util_get_render_target();
 void* d3d_util_get_depth_stencil_view();
 

@@ -2,8 +2,11 @@
 #include <d3d11.h>
 #include <dxgi.h>
 
-static ID3D11Texture2D* render_target = NULL;
-static ID3D11Texture2D* stencil_view = NULL;
+static ID3D11Texture2D* render_target_texture = nullptr;
+static ID3D11RenderTargetView* render_target_view = nullptr;
+static ID3D11Texture2D* stencil_view = nullptr;
+
+#define SAFE_RELEASE(x) if(x) { x->Release(); x = NULL; }
 
 void ThrowIfFailed(HRESULT hr)
 {
@@ -28,12 +31,20 @@ void d3d_util_init(ID3D11Device* device, int width, int height)
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 
-	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, &render_target));
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, &render_target_texture));
+	device->CreateRenderTargetView(render_target_texture, nullptr, &render_target_view);
+}
+
+void d3d_util_deinit()
+{
+	SAFE_RELEASE(render_target_texture);
+	SAFE_RELEASE(render_target_view);
+	SAFE_RELEASE(stencil_view);
 }
 
 void* d3d_util_get_render_target()
 {
-	return render_target;
+	return render_target_texture;
 }
 
 void* d3d_util_get_depth_stencil_view()
