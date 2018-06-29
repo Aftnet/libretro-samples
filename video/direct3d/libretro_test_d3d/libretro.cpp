@@ -7,8 +7,8 @@
 
 #include "libretro_d3d.h"
 
-static struct retro_hw_render_callback hw_render;
-static const struct retro_hw_render_interface_d3d11 *d3d11;
+static struct retro_hw_render_callback hw_render = {};
+static const struct retro_hw_render_interface_d3d11 *d3d11 = nullptr;
 
 static ID3D11Device* d3ddevice = nullptr;
 static ID3D11DeviceContext* d3dctx = nullptr;
@@ -16,8 +16,11 @@ static ID3D11DeviceContext* d3dctx = nullptr;
 const unsigned int fb_width = 800;
 const unsigned int fb_height = 600;
 
-static ID3D11Texture2D* framebuffer_texture;
-static ID3D11RenderTargetView* framebuffer_view;
+static ID3D11Texture2D* framebuffer_texture = nullptr;
+static ID3D11RenderTargetView* framebuffer_view = nullptr;
+static ID3D11ShaderResourceView* framebuffer_shader_resource = nullptr;
+static ID3D11Texture2D* depth_stencil_texture = nullptr;
+static ID3D11DepthStencilView* depth_stencil_view = nullptr;
 
 void retro_init(void)
 {}
@@ -132,12 +135,22 @@ void retro_run(void)
 	}
 
 	//Render here
+
+	ID3D11ShaderResourceView* null_shader_resource = nullptr;
+	d3dctx->PSSetShaderResources(0, 1, &null_shader_resource);
+
+	d3dctx->OMSetRenderTargets(1, &framebuffer_view, nullptr);
 	D3D11_VIDEO_COLOR_RGBA clear_color{ 0.5f, 0.0f, 0.0f, 1.0f };
 	d3dctx->ClearRenderTargetView(framebuffer_view, (float*)&clear_color);
 
-	frame_count++;
+	ID3D11RenderTargetView* null_framebuffer = nullptr;
+	d3dctx->OMSetRenderTargets(1, &null_framebuffer, nullptr);
 
+	//Set the framebuffer as pixel shader resource 0, since RA uses tat do draw to framebuffer
+	d3dctx->PSSetShaderResources(0, 1, &framebuffer_shader_resource);
 	video_cb(RETRO_HW_FRAME_BUFFER_VALID, fb_width, fb_height, 0);
+
+	frame_count++;
 }
 
 static void context_reset(void)
@@ -151,7 +164,7 @@ static void context_reset(void)
 	if (d3d11->interface_version != RETRO_HW_RENDER_INTERFACE_D3D11_VERSION)
 	{
 		//Wrong rendering interface version
-		d3d11 = NULL;
+		d3d11 = nullptr;
 		return;
 	}
 
@@ -173,24 +186,38 @@ static void context_reset(void)
 	desc.MiscFlags = 0;
 
 	assert(SUCCEEDED(d3ddevice->CreateTexture2D(&desc, nullptr, &framebuffer_texture)));
-	assert(SUCCEEDED(d3ddevice->CreateRenderTargetView(framebuffer_texture, NULL, &framebuffer_view)));
+	assert(SUCCEEDED(d3ddevice->CreateRenderTargetView(framebuffer_texture, nullptr, &framebuffer_view)));
+	assert(SUCCEEDED(d3ddevice->CreateShaderResourceView(framebuffer_texture, nullptr, &framebuffer_shader_resource)));
 
-	d3dctx->OMSetRenderTargets(1, &framebuffer_view, NULL);
-
+	//assert(SUCCEEDED(d3ddevice->CreateTexture2D(&desc, nullptr, &depth_stencil_texture)));
+	//assert(SUCCEEDED(d3ddevice->CreateDepthStencilView(depth_stencil_texture, nullptr, &depth_stencil_view)));
 	// Set the viewport
-	D3D11_VIEWPORT viewport {};
+	/*D3D11_VIEWPORT viewport {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.Width = 800;
 	viewport.Height = 600;
 
-	d3dctx->RSSetViewports(1, &viewport);
+	d3dctx->RSSetViewports(1, &viewport);*/
+}
+
+template <class T> void safe_release(T **ppT)
+{
+	if (*ppT)
+	{
+		(*ppT)->Release();
+		*ppT = nullptr;
+	}
 }
 
 static void context_destroy(void)
 {
-	framebuffer_texture->Release();
-	framebuffer_view->Release();
+	safe_release(&framebuffer_texture);
+	safe_release(&framebuffer_texture);
+	safe_release(&framebuffer_view);
+	safe_release(&framebuffer_shader_resource);
+	safe_release(&depth_stencil_texture);
+	safe_release(&depth_stencil_view);
 }
 
 static bool retro_init_hw_context(void)
