@@ -18,13 +18,13 @@
     <ClCompile Include="sokol_gfx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="libretro.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="renderer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="d3d_util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

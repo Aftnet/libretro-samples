@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "libretro_d3d.h"
+#include "d3d_util.h"
 #include "renderer.h"
 
 static struct retro_hw_render_callback hw_render;
@@ -125,12 +126,24 @@ void retro_run(void)
 	{
 	}
 
-	//Render code here
+	ID3D11DeviceContext* d3dctx = d3d11->context;
+
+	//Clear render states set by front end
+	ID3D11ShaderResourceView* target_shader_resource = NULL;
+	d3dctx->PSSetShaderResources(0, 1, &target_shader_resource);
+	d3dctx->GSSetShader(nullptr, nullptr, 0);
+
 	renderer_render_frame();
 
-	frame_count++;
+	ID3D11RenderTargetView* null_framebuffer = nullptr;
+	d3dctx->OMSetRenderTargets(1, &null_framebuffer, nullptr);
 
+	//Set the framebuffer as pixel shader resource 0, since RA uses tat do draw to framebuffer
+	target_shader_resource = d3d_util_get_render_target_shader_resource();
+	d3dctx->PSSetShaderResources(0, 1, &target_shader_resource);
 	video_cb(RETRO_HW_FRAME_BUFFER_VALID, fb_width, fb_height, 0);
+
+	frame_count++;
 }
 
 static void context_reset(void)
@@ -149,7 +162,7 @@ static void context_reset(void)
 	}
 
 	//Recreate d3d resources here
-	renderer_init_d3d(d3d11, fb_width, fb_height);
+	renderer_init_d3d((retro_hw_render_interface_d3d11*)d3d11, fb_width, fb_height);
 }
 
 static void context_destroy(void)

@@ -4,6 +4,7 @@
 
 static ID3D11Texture2D* render_target_texture = nullptr;
 static ID3D11RenderTargetView* render_target_view = nullptr;
+static ID3D11ShaderResourceView* render_target_shader_resource = nullptr;
 static ID3D11Texture2D* stencil_texture = nullptr;
 static ID3D11DepthStencilView* stencil_view = nullptr;
 
@@ -34,7 +35,7 @@ void d3d_util_init(ID3D11Device* device, int width, int height)
 
 	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, &render_target_texture));
 	ThrowIfFailed(device->CreateRenderTargetView(render_target_texture, nullptr, &render_target_view));
-
+	ThrowIfFailed(device->CreateShaderResourceView(render_target_texture, nullptr, &render_target_shader_resource));
 	UINT sample_count = 1;
 
 	D3D11_TEXTURE2D_DESC ds_desc = { 0 };
@@ -61,6 +62,7 @@ void d3d_util_deinit()
 {
 	SAFE_RELEASE(render_target_texture);
 	SAFE_RELEASE(render_target_view);
+	SAFE_RELEASE(render_target_shader_resource);
 	SAFE_RELEASE(stencil_texture);
 	SAFE_RELEASE(stencil_view);
 }
@@ -68,6 +70,11 @@ void d3d_util_deinit()
 void* d3d_util_get_render_target()
 {
 	return render_target_view;
+}
+
+ID3D11ShaderResourceView* d3d_util_get_render_target_shader_resource()
+{
+	return render_target_shader_resource;
 }
 
 void* d3d_util_get_depth_stencil_view()
