@@ -19,8 +19,6 @@ const unsigned int fb_height = 600;
 static ID3D11Texture2D* framebuffer_texture = nullptr;
 static ID3D11RenderTargetView* framebuffer_view = nullptr;
 static ID3D11ShaderResourceView* framebuffer_shader_resource = nullptr;
-static ID3D11Texture2D* depth_stencil_texture = nullptr;
-static ID3D11DepthStencilView* depth_stencil_view = nullptr;
 
 void retro_init(void)
 {}
@@ -189,8 +187,6 @@ static void context_reset(void)
 	assert(SUCCEEDED(d3ddevice->CreateRenderTargetView(framebuffer_texture, nullptr, &framebuffer_view)));
 	assert(SUCCEEDED(d3ddevice->CreateShaderResourceView(framebuffer_texture, nullptr, &framebuffer_shader_resource)));
 
-	//assert(SUCCEEDED(d3ddevice->CreateTexture2D(&desc, nullptr, &depth_stencil_texture)));
-	//assert(SUCCEEDED(d3ddevice->CreateDepthStencilView(depth_stencil_texture, nullptr, &depth_stencil_view)));
 	// Set the viewport
 	/*D3D11_VIEWPORT viewport {};
 	viewport.TopLeftX = 0;
@@ -216,8 +212,6 @@ static void context_destroy(void)
 	safe_release(&framebuffer_texture);
 	safe_release(&framebuffer_view);
 	safe_release(&framebuffer_shader_resource);
-	safe_release(&depth_stencil_texture);
-	safe_release(&depth_stencil_view);
 }
 
 static bool retro_init_hw_context(void)
